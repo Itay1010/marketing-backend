@@ -7,6 +7,7 @@ const reviewService = require('./review.service')
 async function getReviews(req, res) {
     try {
         const reviews = await reviewService.query(req.query)
+        // console.log('getReviews - reviews', reviews)
         res.send(reviews)
     } catch (err) {
         logger.error('Cannot get reviews', err)
@@ -30,28 +31,24 @@ async function deleteReview(req, res) {
 
 
 async function addReview(req, res) {
-
+    logger.info('adding review')
     var loggedinUser = authService.validateToken(req.cookies.loginToken)
- 
     try {
-        var review = req.body
-        review.byUserId = loggedinUser._id
-        review = await reviewService.add(review)
+        const review = req.body
+        review.userId = loggedinUser._id
+        const newReview = await reviewService.add(review)
         
-        // prepare the updated review for sending out
-        review.aboutUser = await userService.getById(review.aboutUserId)
-        
+        // prepare the updated review for sending out        
         // Give the user credit for adding a review
         // var user = await userService.getById(review.byUserId)
         // user.score += 10
-        loggedinUser.score += 10
+        // loggedinUser.score += 10
 
-        loggedinUser = await userService.update(loggedinUser)
-        review.byUser = loggedinUser
+        // loggedinUser = await userService.update(loggedinUser)
 
         // User info is saved also in the login-token, update it
-        const loginToken = authService.getLoginToken(loggedinUser)
-        res.cookie('loginToken', loginToken)
+        // const loginToken = authService.getLoginToken(loggedinUser)
+        // res.cookie('loginToken', loginToken)
 
 
         // const fullUser = await userService.getById(loggedinUser._id)
@@ -59,7 +56,7 @@ async function addReview(req, res) {
         // socketService.emitToUser({type: 'review-about-you', data: review, userId: review.aboutUserId})
         // socketService.emitTo({type: 'user-updated', data: fullUser, label: fullUser._id})
 
-        res.send(review)
+        res.send(newReview)
 
     } catch (err) {
         console.log(err)

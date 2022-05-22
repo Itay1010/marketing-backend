@@ -5,9 +5,9 @@ const ObjectId = require('mongodb').ObjectId
 async function query(filterBy) {
     try {
         const criteria = _buildCriteria(filterBy)
-
+        const pageSkip = filterBy.page - 1 === 0 ? 0 : (+filterBy.page - 1) * 4
         const collection = await dbService.getCollection('toy')
-        var toys = await collection.find(criteria).toArray()
+        var toys = await collection.find(criteria).skip(pageSkip).limit(4).toArray()
         return toys
     } catch (err) {
         logger.error('cannot find toys', err)
@@ -60,12 +60,14 @@ async function update(toy) {
     }
 }
 
-function _buildCriteria({ txt, inStock, label }) {
-    var criteria = { $and: [] }
+function _buildCriteria({ txt, inStock, label, page }) {
+    const criteria = {}
+    const pageSkip = 4
     const reg = { $regex: txt, $options: 'i' }
-    if (txt) criteria.$and.push({ name: reg })
-    if (inStock !== '') criteria.$and.push({ inStock: JSON.parse(inStock) })
-    if(criteria.$and.length <= 1) criteria = {...criteria.$and['0']}
+    if (txt) criteria.name = reg
+    if (inStock !== '') criteria.inStock = JSON.parse(inStock)
+    // if (+page) criteria.skip = +page - 1 === 0 ? 0 : (+page - 1) * 4
+    logger.debug('_buildCriteria - criteria', criteria)
     return criteria
 }
 
