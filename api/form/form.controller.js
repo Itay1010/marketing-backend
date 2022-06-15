@@ -28,14 +28,20 @@ async function getFormById(req, res) {
 
 // POST (add form)
 async function addForm(req, res) {
-  logger.debug('adding')
   try {
-    const form = req.body;
+    const form = req.body
+    const reg = new RegExp('[^@ \t\r\n]+@[^@ \t\r\n]+\.[^@ \t\r\n]+', 'g')
+    const forms = await formService.query({ email: form.email })
+    if (!reg.test(form.email)) throw new Error('invalid email address')
+    else if(forms?.length) throw new Error('user already exists')
+
     const addedForm = await formService.add(form)
     res.json(addedForm)
-  } catch (err) {
-    logger.error('Failed to add form', err)
-    res.status(500).send({ err: 'Failed to add form' })
+  } catch (error) {
+    logger.error('Failed to add form', error)
+    if (error.code === 'noEmail') res.status(400).send({ error: 'Failed to add form' })
+    else if (error.code === 'userExists') res.status(405).send({ error: 'Failed to add form' })
+    else res.status(500).send({ error: 'Failed to add form' })
   }
 }
 

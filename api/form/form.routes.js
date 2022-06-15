@@ -10,7 +10,7 @@ const router = express.Router()
 router.get('/', log, getForms)
 router.get('/:id', getFormById)
 
-// authenticated routs
+// authenticated routes
 // router.post('/', requireAuth, requireAdmin, addForm)
 // router.put('/:id', requireAuth, requireAdmin, updateForm)
 // router.delete('/:id', requireAuth, requireAdmin, removeForm)

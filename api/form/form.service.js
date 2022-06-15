@@ -4,9 +4,12 @@ const ObjectId = require('mongodb').ObjectId
 
 async function query(filterBy = { page: 1 }) {
     try {
-        const pageSkip = filterBy.page - 1 === 0 ? 0 : (+filterBy.page - 1) * 4
+        // const pageSkip = filterBy.page - 1 === 0 ? 0 : (+filterBy.page - 1) * 4
+        // var forms = await collection.find({}).skip(pageSkip).limit(4).toArray()
+        const criteria = filterBy.email || {}
+        logger.debug('filterBy.email', filterBy.email)
         const collection = await dbService.getCollection('form')
-        var forms = await collection.find(criteria).skip(pageSkip).limit(4).toArray()
+        var forms = await collection.find(criteria).toArray()
         return forms
     } catch (err) {
         logger.error('cannot find forms', err)
